@@ -18,9 +18,9 @@ win64:
 
 
 .PHONY: install
-install: wavfix
+install:
 	mkdir -p $(PREFIX)/bin
-	cp $< $(PREFIX)/bin/wavfix
+	cp bin/wavfix $(PREFIX)/bin/wavfix
 
 .PHONY: uninstall
 uninstall:
