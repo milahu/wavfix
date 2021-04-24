@@ -25,6 +25,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <errno.h>
+#include <libgen.h> // basename
 
 // This block should be better implemented.
 #if defined(__linux__)
@@ -116,38 +117,21 @@ size_t load_file( unsigned char **buf, char *filename ) {
 	return sb.st_size;
 }
 
+// https://stackoverflow.com/a/5309508
+const char *get_filename_ext(const char *filename) {
+	const char *dot = strrchr(filename, '.');
+	if(!dot || dot == filename) return "";
+	return dot + 1;
+}
+
+
 int build_output_file_path( char *outfile, const char *infile, const char *suffix ) {
-
-	char basename[NAME_MAX + 1];
-	char ext[16];
-
-	memset(outfile, 0x00, NAME_MAX);
-	int ext_offset = strlen(infile) - 1;
-
-	/* retrieve extension */
-	while ( infile[ext_offset-1] != '.' && ext_offset > 0 )
-		ext_offset--;
-
-	snprintf(ext, 15, infile + ext_offset);
-
-	/*
-		name overflow prevention
-
-		TODO: include /path/to/file/
-		in filename length. that is
-		just wrong ..
-	*/
-	if ( strlen(infile) - strlen(suffix) > NAME_MAX )
-		ext_offset -= strlen(suffix);
-
-	/* retreive basename */
-	snprintf( basename, NAME_MAX, "%s", infile );
-
-	basename[ext_offset-1] = '\0';
-
-
-	snprintf( outfile, NAME_MAX, "%s%s.%s", basename, suffix, ext );
-
+	char *bname;
+	char **ext;
+	memset(outfile, 0, NAME_MAX);
+	ext = (char **) get_filename_ext(infile);
+	bname = basename((char *) infile);
+	snprintf( outfile, NAME_MAX, "%s%s.%s", bname, suffix, *ext );
 	return 1;
 }
 
